@@ -14,7 +14,7 @@ public class CustomWebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/")
+        registry.addMapping("/**")
                 .allowedOrigins("http://localhost:5173") // Add the appropriate origin of your client application
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
@@ -25,7 +25,7 @@ public class CustomWebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(final ResourceHandlerRegistry registry) {
         String location = storageProperties.getLocation();
-        registry.addResourceHandler("/"+location+"/")
+        registry.addResourceHandler("/"+location+"/**")
                 .addResourceLocations("file:"+location+"/");
     }
 }
