@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.constants.Roles;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 
 @Configuration
 @EnableWebSecurity
@@ -20,11 +22,9 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
-                .cors(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth-> auth
+                .cors().and().csrf().disable()
+                .authorizeHttpRequests()
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/api/account/**").permitAll()
                         .requestMatchers("/uploading/**").permitAll()
@@ -34,14 +34,21 @@ public class SecurityConfiguration {
                         .requestMatchers("/webjars/**").permitAll()
                         .requestMatchers("/rest-api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
-                        .requestMatchers("/api/categories/**").permitAll()//.hasAuthority(Roles.Admin)
-                        .requestMatchers("/api/products/**").permitAll()//.hasAuthority(Roles.Admin)
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(it->it.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .requestMatchers(HttpMethod.GET,"/api/categories/search").permitAll()
+                .requestMatchers("/api/categories/**").hasAuthority(Roles.Admin)
+                .requestMatchers(HttpMethod.GET,"/api/products/search").permitAll()
+                .requestMatchers("/api/products/**").hasAuthority(Roles.Admin)
+                        .requestMatchers("/api/products/**").hasAuthority(Roles.Admin)
+                .anyRequest().authenticated()
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 }
+
+
+
+
